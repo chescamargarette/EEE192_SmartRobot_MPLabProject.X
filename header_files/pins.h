@@ -12,8 +12,8 @@
 // Line Sensor Pin Definitions 
 #define LEFT_LINE_1     3       // PA03 - Left sensor 1
 #define LEFT_LINE_2     2       // PA02 - Left sensor 2
-#define MIDDLE_LINE_1   11      // PB03 - Middle sensor 1
-#define MIDDLE_LINE_2   10      // PB02 - Middle sensor 2
+#define MIDDLE_LINE_1   3       // PB03 - Middle sensor 1
+#define MIDDLE_LINE_2   2       // PB02 - Middle sensor 2
 #define RIGHT_LINE_1    23      // PB23 - Right sensor 1
 #define RIGHT_LINE_2    19      // PA19 - Right sensor 2
 
