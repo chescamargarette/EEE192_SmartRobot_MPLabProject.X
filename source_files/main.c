@@ -25,10 +25,19 @@ int alternate_state = 0;  // 0 = normal, 1 = boost left, 2 = no boost
 unsigned long last_alternate_time = 0;
 unsigned long current_time = 0;
 
-// Global variables for sensor debouncing
-int raw_left = 0, raw_mid = 0, raw_right = 0;
-int debounced_left = 0, debounced_mid = 0, debounced_right = 0;
-unsigned long left_debounce_time = 0, mid_debounce_time = 0, right_debounce_time = 0;
+// Global variables for 6 line sensors (raw and debounced)
+int raw_left1 = 0, raw_left2 = 0, raw_mid1 = 0, raw_mid2 = 0, raw_right1 = 0, raw_right2 = 0;
+int debounced_left1 = 0, debounced_left2 = 0, debounced_mid1 = 0, debounced_mid2 = 0, debounced_right1 = 0, debounced_right2 = 0;
+
+// Debounce timers for each sensor
+unsigned long left1_debounce_time = 0, left2_debounce_time = 0;
+unsigned long mid1_debounce_time = 0, mid2_debounce_time = 0;
+unsigned long right1_debounce_time = 0, right2_debounce_time = 0;
+
+// Combined sensor states for decision making
+int left_sensors_active = 0;    // LEFT_LINE_1 OR LEFT_LINE_2
+int middle_sensors_active = 0;  // MIDDLE_LINE_1 OR MIDDLE_LINE_2
+int right_sensors_active = 0;   // RIGHT_LINE_1 OR RIGHT_LINE_2
 
 // Global variables for stop debounce (ONLY for ALL LO)
 unsigned long no_sensors_triggered_time = 0;
@@ -53,81 +62,144 @@ void pause_delay(void)
     for (volatile int i = 0; i < 1000; i++);
 }
 
-// Debounced sensor reading function
+// Debounced sensor reading function for 6 line sensors
 void update_debounced_sensors(void)
 {
-    // Read raw sensor values
-    raw_left = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << LEFT_SENSOR)) ? 1 : 0;
-    raw_mid = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MID_SENSOR)) ? 1 : 0;
-    raw_right = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << RIGHT_SENSOR)) ? 1 : 0;
+    // Read raw sensor values for all 6 sensors
+    raw_left1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << LEFT_LINE_1)) ? 1 : 0;
+    raw_left2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << LEFT_LINE_2)) ? 1 : 0;
+    raw_mid1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MIDDLE_LINE_1)) ? 1 : 0;
+    raw_mid2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MIDDLE_LINE_2)) ? 1 : 0;
+    raw_right1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << RIGHT_LINE_1)) ? 1 : 0;
+    raw_right2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << RIGHT_LINE_2)) ? 1 : 0;
     
-    // Debounce LEFT sensor
-    if (raw_left != debounced_left) {
-        if (left_debounce_time == 0) {
-            left_debounce_time = current_time;
-        } else if ((current_time - left_debounce_time) >= SENSOR_DEBOUNCE_MS) {
-            debounced_left = raw_left;
-            left_debounce_time = 0;
+    // Debounce LEFT_LINE_1
+    if (raw_left1 != debounced_left1) {
+        if (left1_debounce_time == 0) {
+            left1_debounce_time = current_time;
+        } else if ((current_time - left1_debounce_time) >= SENSOR_DEBOUNCE_MS) {
+            debounced_left1 = raw_left1;
+            left1_debounce_time = 0;
         }
     } else {
-        left_debounce_time = 0;
+        left1_debounce_time = 0;
     }
     
-    // Debounce MID sensor
-    if (raw_mid != debounced_mid) {
-        if (mid_debounce_time == 0) {
-            mid_debounce_time = current_time;
-        } else if ((current_time - mid_debounce_time) >= SENSOR_DEBOUNCE_MS) {
-            debounced_mid = raw_mid;
-            mid_debounce_time = 0;
+    // Debounce LEFT_LINE_2
+    if (raw_left2 != debounced_left2) {
+        if (left2_debounce_time == 0) {
+            left2_debounce_time = current_time;
+        } else if ((current_time - left2_debounce_time) >= SENSOR_DEBOUNCE_MS) {
+            debounced_left2 = raw_left2;
+            left2_debounce_time = 0;
         }
     } else {
-        mid_debounce_time = 0;
+        left2_debounce_time = 0;
     }
     
-    // Debounce RIGHT sensor
-    if (raw_right != debounced_right) {
-        if (right_debounce_time == 0) {
-            right_debounce_time = current_time;
-        } else if ((current_time - right_debounce_time) >= SENSOR_DEBOUNCE_MS) {
-            debounced_right = raw_right;
-            right_debounce_time = 0;
+    // Debounce MIDDLE_LINE_1
+    if (raw_mid1 != debounced_mid1) {
+        if (mid1_debounce_time == 0) {
+            mid1_debounce_time = current_time;
+        } else if ((current_time - mid1_debounce_time) >= SENSOR_DEBOUNCE_MS) {
+            debounced_mid1 = raw_mid1;
+            mid1_debounce_time = 0;
         }
     } else {
-        right_debounce_time = 0;
+        mid1_debounce_time = 0;
     }
+    
+    // Debounce MIDDLE_LINE_2
+    if (raw_mid2 != debounced_mid2) {
+        if (mid2_debounce_time == 0) {
+            mid2_debounce_time = current_time;
+        } else if ((current_time - mid2_debounce_time) >= SENSOR_DEBOUNCE_MS) {
+            debounced_mid2 = raw_mid2;
+            mid2_debounce_time = 0;
+        }
+    } else {
+        mid2_debounce_time = 0;
+    }
+    
+    // Debounce RIGHT_LINE_1
+    if (raw_right1 != debounced_right1) {
+        if (right1_debounce_time == 0) {
+            right1_debounce_time = current_time;
+        } else if ((current_time - right1_debounce_time) >= SENSOR_DEBOUNCE_MS) {
+            debounced_right1 = raw_right1;
+            right1_debounce_time = 0;
+        }
+    } else {
+        right1_debounce_time = 0;
+    }
+    
+    // Debounce RIGHT_LINE_2
+    if (raw_right2 != debounced_right2) {
+        if (right2_debounce_time == 0) {
+            right2_debounce_time = current_time;
+        } else if ((current_time - right2_debounce_time) >= SENSOR_DEBOUNCE_MS) {
+            debounced_right2 = raw_right2;
+            right2_debounce_time = 0;
+        }
+    } else {
+        right2_debounce_time = 0;
+    }
+    
+    // Update combined sensor states
+    left_sensors_active = debounced_left1 || debounced_left2;
+    middle_sensors_active = debounced_mid1 || debounced_mid2;
+    right_sensors_active = debounced_right1 || debounced_right2;
 }
 
-// Function to determine movement state with 10ms debounce
-// NEW LOGIC: left AND right HIGH but center LOW = FORWARD (treat as position glitch)
-int get_debounced_state(int left, int mid, int right)
+// Function to determine movement state with new 6-sensor logic
+int get_movement_state(void)
 {
-    int new_state = -1;
+    int all_sensors_hi = left_sensors_active && middle_sensors_active && right_sensors_active;
+    int all_sensors_lo = !left_sensors_active && !middle_sensors_active && !right_sensors_active;
     
-    // NEW: If left AND right are HIGH, but center is LOW -> go FORWARD
-    // This handles the robot being positioned between lines or sensor glitch
-    if (left && right && !mid) {
-        new_state = 0;  // FORWARD (treat as centered)
+    // Rule 4: ALL sensors are HI -> go forward
+    if (all_sensors_hi) {
+        return 0;  // FORWARD
     }
-    // Determine new state based on debounced sensors
-    else if (mid && !left && !right) {
-        new_state = 0;  // FORWARD
+    
+    // Rule 5: ALL sensors are LO -> stop
+    if (all_sensors_lo) {
+        return 4;  // STOP
     }
-    else if (left && mid && !right) {
-        new_state = 2;  // PIVOT LEFT (from slightly left)
+    
+    // Rule 1: Middle sensors active -> forward
+    if (middle_sensors_active) {
+        return 0;  // FORWARD
     }
-    else if (!left && mid && right) {
-        new_state = 3;  // PIVOT RIGHT (from slightly right)
+    
+    // Rule 2: Left sensors active -> pivot left
+    if (left_sensors_active && !right_sensors_active) {
+        return 2;  // PIVOT LEFT
     }
-    else if (left && !mid && !right) {
-        new_state = 2;  // PIVOT LEFT (hard left)
+    
+    // Rule 3: Right sensors active -> pivot right
+    if (right_sensors_active && !left_sensors_active) {
+        return 3;  // PIVOT RIGHT
     }
-    else if (!left && !mid && right) {
-        new_state = 3;  // PIVOT RIGHT (hard right)
+    
+    // Rule 6: Left + Middle 1 active -> pivot left
+    if ((debounced_left1 || debounced_left2) && debounced_mid1) {
+        return 2;  // PIVOT LEFT
     }
-    else {
-        new_state = 4;  // STOP (for ALL LO after debounce)
+    
+    // Rule 7: Right + Middle 2 active -> pivot right
+    if ((debounced_right1 || debounced_right2) && debounced_mid2) {
+        return 3;  // PIVOT RIGHT
     }
+    
+    // Default: forward
+    return 0;
+}
+
+// Debounced state change function
+int get_debounced_state(void)
+{
+    int new_state = get_movement_state();
     
     // Debounce state changes (10ms)
     if (new_state != last_state) {
@@ -242,18 +314,26 @@ int main(void)
     // Set LED as output
     PORT_SEC_REGS->GROUP[0].PORT_DIRSET = (1 << ONBOARD_LED);
     
-    // Set line sensor pins as inputs
-    PORT_SEC_REGS->GROUP[0].PORT_DIRCLR = (1 << LEFT_SENSOR) | (1 << MID_SENSOR) | (1 << RIGHT_SENSOR);
+    // Set all 6 line sensor pins as inputs
+    PORT_SEC_REGS->GROUP[0].PORT_DIRCLR = (1 << LEFT_LINE_1) | (1 << LEFT_LINE_2) | 
+                                          (1 << MIDDLE_LINE_1) | (1 << MIDDLE_LINE_2) |
+                                          (1 << RIGHT_LINE_1) | (1 << RIGHT_LINE_2);
     
-    // Enable input buffers for sensors
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_SENSOR] |= PORT_PINCFG_INEN(1);   
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MID_SENSOR] |= PORT_PINCFG_INEN(1);    
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_SENSOR] |= PORT_PINCFG_INEN(1);  
+    // Enable input buffers for all 6 sensors
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_1] |= PORT_PINCFG_INEN(1);   
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_2] |= PORT_PINCFG_INEN(1);   
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_1] |= PORT_PINCFG_INEN(1);    
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_2] |= PORT_PINCFG_INEN(1);    
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_1] |= PORT_PINCFG_INEN(1);   
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_2] |= PORT_PINCFG_INEN(1);   
     
-    // Disable pull-ups
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_SENSOR] &= ~PORT_PINCFG_PULLEN_Msk;
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MID_SENSOR] &= ~PORT_PINCFG_PULLEN_Msk;
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_SENSOR] &= ~PORT_PINCFG_PULLEN_Msk;
+    // Disable pull-ups for all 6 sensors
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
     
     // Turn LED ON by default
     led_on();
@@ -269,9 +349,12 @@ int main(void)
     current_time = 0;
     
     // Initialize debounce timers
-    left_debounce_time = 0;
-    mid_debounce_time = 0;
-    right_debounce_time = 0;
+    left1_debounce_time = 0;
+    left2_debounce_time = 0;
+    mid1_debounce_time = 0;
+    mid2_debounce_time = 0;
+    right1_debounce_time = 0;
+    right2_debounce_time = 0;
     no_sensors_triggered_time = 0;
     state_change_time = 0;
     
@@ -287,21 +370,17 @@ int main(void)
         // Update debounced sensor readings
         update_debounced_sensors();
         
-        // Check for ALL HI (no debounce, immediate)
-        int all_sensors_hi = debounced_left && debounced_mid && debounced_right;
-        
-        // Check for left AND right HIGH but center LOW (treat as forward, not stop)
-        int left_right_only = debounced_left && debounced_right && !debounced_mid;
-        
-        // Check for ALL LO (with 100ms debounce)
-        int all_sensors_lo = !debounced_left && !debounced_mid && !debounced_right;
+        // Get combined states
+        int all_sensors_hi = left_sensors_active && middle_sensors_active && right_sensors_active;
+        int all_sensors_lo = !left_sensors_active && !middle_sensors_active && !right_sensors_active;
+        int any_sensor_high = left_sensors_active || middle_sensors_active || right_sensors_active;
         
         int should_stop = 0;
         
         if (all_sensors_hi) {
             // ALL HI - maintain last valid state, reset stop timer
             no_sensors_triggered_time = 0;
-            // Keep using last_valid_state (no state change)
+            current_state = 0;  // Force forward for ALL HI
         }
         else if (all_sensors_lo) {
             // ALL LO - check 100ms debounce
@@ -317,16 +396,13 @@ int main(void)
             no_sensors_triggered_time = 0;
             
             // Get debounced movement state (10ms debounce)
-            // The get_debounced_state function now handles left+right=forward
-            current_state = get_debounced_state(debounced_left, debounced_mid, debounced_right);
+            current_state = get_debounced_state();
             
             // Update last valid state (only for movement states, not stop)
             if (current_state == 0 || current_state == 2 || current_state == 3) {
                 last_valid_state = current_state;
             }
         }
-        
-        int any_sensor_high = debounced_left || debounced_mid || debounced_right;
         
         // LED Control
         if (any_sensor_high && !should_stop && !all_sensors_hi) {
@@ -355,31 +431,18 @@ int main(void)
             }
         }
         
-        if (current_state == 0) {  // FORWARD
-            run_motors_forward_alternating();
         // Execute movement based on conditions
-        }
-        else if (should_stop) {
+        if (should_stop) {
             // Stop only after 100ms of ALL LO
             stop_motors();
             pause_delay();
         }
         else if (all_sensors_hi) {
-            // Forward direction                          
-            // ALL HI - continue last valid state (no debounce, immediate)
-            
-            if (last_valid_state == 0) {
-                run_motors_forward_alternating();
-            }
-            else if (last_valid_state == 2) {
-                run_motors_pivot_left();
-            }
-            else if (last_valid_state == 3) {
-                run_motors_pivot_right();
-            }
-            else {
-                run_motors_forward_alternating();
-            }
+            // ALL HI - go forward
+            run_motors_forward_alternating();
+        }
+        else if (current_state == 0) {  // FORWARD
+            run_motors_forward_alternating();
         }
         else if (current_state == 2) {  // PIVOT LEFT
             run_motors_pivot_left();
@@ -390,11 +453,6 @@ int main(void)
         else if (current_state == 4) {  // STOP (from debounced state)
             stop_motors();
             pause_delay();
-        }
-        else if (left_right_only) {
-            // NEW: Left and Right HIGH but Center LOW -> go straight forward
-            // This handles position glitches where robot is between lines
-            run_motors_forward_alternating();
         }
         else {
             // Unknown state - continue last valid state
