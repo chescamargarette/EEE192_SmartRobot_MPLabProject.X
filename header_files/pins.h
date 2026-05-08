@@ -2,12 +2,12 @@
 #define PINS_H
 
 // Motor Pin Definitions
-#define EN_LEFT_MOTOR   8      // Enable left motor
-#define REV_LEFT_MOTOR  11      // reverse left motor
-#define FOR_LEFT_MOTOR  9       // forward left motor
+#define EN_LEFT_MOTOR   16      // Enable left motor
+#define REV_LEFT_MOTOR  8      // reverse left motor
+#define FOR_LEFT_MOTOR  11       // forward left motor
 #define EN_RIGHT_MOTOR  17      // Enable right motor
-#define REV_RIGHT_MOTOR 10      // reverse right motor
-#define FOR_RIGHT_MOTOR 16       // forward right motor
+#define REV_RIGHT_MOTOR 9      // reverse right motor
+#define FOR_RIGHT_MOTOR 10       // forward right motor
 
 // Line Sensor Pin Definitions 
 #define LEFT_LINE_1     3       // PA03 - Left sensor 1
@@ -19,18 +19,21 @@
 
 // Wall Sensor Pin Definitions
 // Left Wall Sensor
-//#define LEFT_WALL_TRIG  20      // PA20 - Left wall trigger
-//#define LEFT_WALL_ECHO  14      // PA14 - Left wall echo
+#define LEFT_WALL_TRIG  20      // PA20 - Left wall trigger
+#define LEFT_WALL_ECHO  14      // PA14 - Left wall echo
 
 // Middle Wall Sensor
-#define MIDDLE_WALL_TRIG 0     // PA00 - Middle wall trigger
-#define MIDDLE_WALL_ECHO 1     // PA01 - Middle wall echo
+#define MIDDLE_WALL_TRIG      // PA16 - Middle wall trigger
+#define MIDDLE_WALL_ECHO      // PA17 - Middle wall echo
 
 // Right Wall Sensor
-//#define RIGHT_WALL_TRIG 21      // PA21 - Right wall trigger
-//#define RIGHT_WALL_ECHO 22      // PA22 - Right wall echo
+#define RIGHT_WALL_TRIG 21      // PA21 - Right wall trigger
+#define RIGHT_WALL_ECHO 22      // PA22 - Right wall echo
 
 // Onboard LED Pin Definition
 #define ONBOARD_LED     15      // PA15
+
+#define LCD_SDA 12
+#define LCD_SCL 13
 
 #endif // PINS_H
