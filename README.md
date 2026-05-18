@@ -55,9 +55,3 @@ These files implement:
 - State machines
 - Navigation behavior
 - Integrated sensor control
-
----
-
-## GitHub Integration
-
-This project repository is integrated with GitHub to allow collaborative development, version control, and easier code management. It may also be built and managed directly through MPLAB X IDE using Git integration.
