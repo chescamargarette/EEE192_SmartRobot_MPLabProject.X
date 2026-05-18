@@ -4,7 +4,7 @@
 
 Welcome to the official GitHub repository for our EEE 192 Smart Robot Project. This repository contains the development files, source codes, and documentation for our robot system:
 
-# BEBOT: BIT-32 Environmental Boundary and Obstacle Transverser
+## BEBOT: BIT-32 Environmental Boundary and Obstacle Transverser
 
 This project is developed by:
 - Cyra Beringuela  
