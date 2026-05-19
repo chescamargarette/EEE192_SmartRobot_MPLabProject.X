@@ -21,11 +21,11 @@ extern unsigned long last_alternate_time;
 
 // Function Declarations
 void enable_motors(void);
+void delay_motors(void);
 void stop_motors(void);
 void run_motors_forward(void);
 void run_motors_reverse(void);
 void turn_motors_left(void);
 void turn_motors_right(void);
-void delay_motors(void);
 
 #endif // MOTOR_H
