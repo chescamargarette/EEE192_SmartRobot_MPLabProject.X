@@ -17,7 +17,6 @@ void init_motors(void) {
                                           (1 << LEFT_MOTOR_FOR) | (1 << LEFT_MOTOR_REV) | 
                                           (1 << RIGHT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
     // Calculate PWM on-times based on speed percentages
-    // Scale 0-100 to microseconds within PWM cycle
     left_on_time = (LEFT_MOTOR_SPEED * PWM_CYCLE) / 100;
     right_on_time = (RIGHT_MOTOR_SPEED * PWM_CYCLE) / 100;
 }
@@ -36,21 +35,24 @@ void stop_motors(void) {
 }
 
 void run_motors_forward(void) {
+    // Turn both motors ON
     PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_FOR);
     PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_REV) | (1 << RIGHT_MOTOR_REV);
+    // PWM cycle - both motors run simultaneously
     for (int t = 0; t < PWM_CYCLE; t++) {
+        // Turn LEFT motor OFF after its on_time expires
         if (t == left_on_time) {
             PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR);
         }
+        // Turn RIGHT motor OFF after its on_time expires
         if (t == right_on_time) {
             PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << RIGHT_MOTOR_FOR);
         }
-        delay_us(1);  // 1us per iteration
+        // 1us delay (1 nop = 1us at 1MHz)
+        __asm__ volatile ("nop");
     }
-    
     // Ensure both motors are OFF at end of PWM cycle
     PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_FOR);
-    
     // Off time between cycles
     for (volatile int off_ticks = 0; off_ticks < MOTOR_OFF_TIME; off_ticks++);
 }
