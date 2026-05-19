@@ -12,7 +12,7 @@
 #define LEFT_MOTOR_TIME    80
 #define RIGHT_MOTOR_TIME   10
 #define MOTOR_OFF_TIME     85
-#define ALT_INTERVAl       1
+#define ALT_INTERVAL_MS    1
 #define ALT_BOOST          20
 
 // Global Variables
