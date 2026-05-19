@@ -1,3 +1,7 @@
+// This source file contains the execution of the motor control block.
+// NOTE: Do not use, this is not yet integrated to main.c
+// For future purposes
+
 #include <xc.h>
 #include "pins.h"
 #include "motor.h"
