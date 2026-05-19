@@ -1,3 +1,7 @@
+// This header file contains the initialization of the USART debugging.
+// NOTE: Do not use, this is not yet integrated to main.c
+// For future purposes
+
 #ifndef USART_H
 #define USART_H
 
