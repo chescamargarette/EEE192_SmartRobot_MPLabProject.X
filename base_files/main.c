@@ -1,4 +1,5 @@
 // Current version by Cyra (May 19)
+// motor control + line sensor + lcd + bluetooth
 
 #include <xc.h>
 #include <stdbool.h>
