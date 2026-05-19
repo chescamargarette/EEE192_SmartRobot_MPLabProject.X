@@ -9,8 +9,8 @@
 #include <stdbool.h>
 
 // Global Definitions
-#define LEFT_MOTOR_SPEED    80  // Adjust since right motor is faster
-#define RIGHT_MOTOR_SPEED   10  // Adjust since right motor is faster
+#define LEFT_MOTOR_SPEED    80    // Adjust since right motor is faster (L > R)
+#define RIGHT_MOTOR_SPEED   10    // Adjust since right motor is faster (L > R)
 #define MOTOR_OFF_TIME      85
 #define PWM_CYCLE           2000  // 2ms PWM cycle
 
