@@ -9,15 +9,10 @@
 #include <stdbool.h>
 
 // Global Definitions
-#define LEFT_MOTOR_TIME    80
-#define RIGHT_MOTOR_TIME   10
-#define MOTOR_OFF_TIME     85
-#define ALT_INTERVAL       1
-#define ALT_BOOST          20
-
-// Global Variables
-extern int alternate_state;
-extern unsigned long last_alternate_time;
+#define LEFT_MOTOR_SPEED    80  // Adjust since right motor is faster
+#define RIGHT_MOTOR_SPEED   10  // Adjust since right motor is faster
+#define MOTOR_OFF_TIME      85
+#define PWM_CYCLE           2000  // 2ms PWM cycle
 
 // Function Declarations
 void init_motors(void);
