@@ -7,8 +7,8 @@
 #include "motor.h"
 
 // Initialize Global Variables
-int alternate_state = 0;
-unsigned long last_alternate_time = 0;
+extern int alternate_state = 0;
+extern unsigned long last_alternate_time = 0;
 
 // Function Definitions
 void init_motors(void) {
