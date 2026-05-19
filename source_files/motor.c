@@ -11,6 +11,12 @@ int alternate_state = 0;
 unsigned long last_alternate_time = 0;
 
 // Function Definitions
+void init_motors(void) {
+    // Set motor pins as outputs
+    PORT_SEC_REGS->GROUP[0].PORT_DIRSET = (1 << LEFT_MOTOR_EN) | (1 << RIGHT_MOTOR_EN) | 
+                                          (1 << LEFT_MOTOR_FOR) | (1 << LEFT_MOTOR_REV) | 
+                                          (1 << RIGHT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
+}
 
 void enable_motors(void) {
     PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_EN) | (1 << RIGHT_MOTOR_EN);
