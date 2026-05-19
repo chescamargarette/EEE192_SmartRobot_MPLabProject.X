@@ -1,3 +1,7 @@
+// This header file contains the initialization of the entire project.
+// NOTE: Do not use, this is not yet integrated to main.c
+// For future purposes
+
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
