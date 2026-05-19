@@ -12,7 +12,7 @@
 #define LEFT_MOTOR_TIME    80
 #define RIGHT_MOTOR_TIME   10
 #define MOTOR_OFF_TIME     85
-#define ALT_INTERVAL_MS    1
+#define ALT_INTERVAL       1
 #define ALT_BOOST          20
 
 // Global Variables
@@ -20,6 +20,7 @@ extern int alternate_state;
 extern unsigned long last_alternate_time;
 
 // Function Declarations
+void init_motors(void);
 void enable_motors(void);
 void delay_motors(void);
 void stop_motors(void);
