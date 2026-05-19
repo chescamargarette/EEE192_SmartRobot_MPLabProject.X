@@ -31,10 +31,11 @@ void I2C_Init(void){
     // Enable bus clock
     MCLK_REGS->MCLK_APBCMASK |= MCLK_APBCMASK_SERCOM2_Msk;
 
-    // Configure pins for SERCOM2 (PA08=SDA, PA09=SCL)
+    // Configure pins for SERCOM2 (PA12=SDA, PA13=SCL from pins.h)
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LCD_SDA] = 0x5U;
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LCD_SCL] = 0x5U;
-    PORT_SEC_REGS->GROUP[0].PORT_PMUX[6]    = 0x22U;
+    // PMUX for PA12 and PA13: PA12 is on PMUX[6] (pins 12-13), PA13 on PMUX[6] as well
+    PORT_SEC_REGS->GROUP[0].PORT_PMUX[6] = 0x22U;  // SERCOM2 function C (0x2)
 
     // Reset SERCOM2
     SERCOM2_REGS->I2CM.SERCOM_CTRLA = SERCOM_I2CM_CTRLA_SWRST_Msk;
@@ -171,7 +172,7 @@ void LCD_Init(void) {
     delay_ms(20);
 }
 
-// ====== Original Motor/Sensor Code ======
+// ====== Motor/Sensor Code ======
 
 // Speed Control
 #define LEFT_MOTOR_TIME    80
@@ -210,7 +211,7 @@ unsigned long state_change_time = 0;
 int last_valid_state = 0;
 
 void enable_motors(void) {
-    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << EN_LEFT_MOTOR) | (1 << EN_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_EN) | (1 << RIGHT_MOTOR_EN);
 }
 
 void pause_delay(void) {
@@ -220,8 +221,8 @@ void pause_delay(void) {
 void update_debounced_sensors(void) {
     raw_left1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << LEFT_LINE_1)) ? 1 : 0;
     raw_left2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << LEFT_LINE_2)) ? 1 : 0;
-    raw_mid1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MIDDLE_LINE_1)) ? 1 : 0;
-    raw_mid2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MIDDLE_LINE_2)) ? 1 : 0;
+    raw_mid1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MID_LINE_1)) ? 1 : 0;
+    raw_mid2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << MID_LINE_2)) ? 1 : 0;
     raw_right1 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << RIGHT_LINE_1)) ? 1 : 0;
     raw_right2 = (PORT_SEC_REGS->GROUP[0].PORT_IN & (1 << RIGHT_LINE_2)) ? 1 : 0;
 
@@ -302,8 +303,8 @@ int get_debounced_state(void) {
 }
 
 void run_motors_forward_alternating(void) {
-    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << FOR_LEFT_MOTOR) | (1 << FOR_RIGHT_MOTOR);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << REV_LEFT_MOTOR) | (1 << REV_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_FOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_REV) | (1 << RIGHT_MOTOR_REV);
 
     int left_time = LEFT_MOTOR_TIME;
     int right_time = RIGHT_MOTOR_TIME;
@@ -314,36 +315,36 @@ void run_motors_forward_alternating(void) {
     }
 
     for (volatile int on_ticks = 0; on_ticks < left_time; on_ticks++);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << FOR_LEFT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR);
 
     for (volatile int on_ticks = 0; on_ticks < right_time; on_ticks++);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << FOR_RIGHT_MOTOR); 
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << RIGHT_MOTOR_FOR); 
 
     for (volatile int off_ticks = 0; off_ticks < MOTOR_OFF_TIME; off_ticks++);
 }
 
 void run_motors_pivot_left(void) {
-    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << REV_LEFT_MOTOR) | (1 << FOR_RIGHT_MOTOR);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << FOR_LEFT_MOTOR) | (1 << REV_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_REV) | (1 << RIGHT_MOTOR_FOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
 
     for (volatile int on_ticks = 0; on_ticks < LEFT_MOTOR_TIME; on_ticks++);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << REV_LEFT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_REV);
 
     for (volatile int on_ticks = 0; on_ticks < RIGHT_MOTOR_TIME; on_ticks++);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << FOR_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << RIGHT_MOTOR_FOR);
 
     for (volatile int off_ticks = 0; off_ticks < MOTOR_OFF_TIME; off_ticks++);
 }
 
 void run_motors_pivot_right(void) {
-    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << FOR_LEFT_MOTOR) | (1 << REV_RIGHT_MOTOR);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << REV_LEFT_MOTOR) | (1 << FOR_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_REV) | (1 << RIGHT_MOTOR_FOR);
 
     for (volatile int on_ticks = 0; on_ticks < LEFT_MOTOR_TIME; on_ticks++);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << FOR_LEFT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR);
 
     for (volatile int on_ticks = 0; on_ticks < RIGHT_MOTOR_TIME; on_ticks++);
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << REV_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << RIGHT_MOTOR_REV);
 
     for (volatile int off_ticks = 0; off_ticks < MOTOR_OFF_TIME; off_ticks++);
 }
@@ -357,38 +358,38 @@ void led_off(void) {
 }
 
 void stop_motors(void) {
-    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << FOR_LEFT_MOTOR) | (1 << REV_LEFT_MOTOR) | 
-                                          (1 << FOR_RIGHT_MOTOR) | (1 << REV_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR) | (1 << LEFT_MOTOR_REV) | 
+                                          (1 << RIGHT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
 }
 
 // ====== Main ======
 int main(void) {
     // Set motor pins as outputs
-    PORT_SEC_REGS->GROUP[0].PORT_DIRSET = (1 << EN_LEFT_MOTOR) | (1 << EN_RIGHT_MOTOR) | 
-                                          (1 << FOR_LEFT_MOTOR) | (1 << REV_LEFT_MOTOR) | 
-                                          (1 << FOR_RIGHT_MOTOR) | (1 << REV_RIGHT_MOTOR);
+    PORT_SEC_REGS->GROUP[0].PORT_DIRSET = (1 << LEFT_MOTOR_EN) | (1 << RIGHT_MOTOR_EN) | 
+                                          (1 << LEFT_MOTOR_FOR) | (1 << LEFT_MOTOR_REV) | 
+                                          (1 << RIGHT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
 
     // Set LED as output
     PORT_SEC_REGS->GROUP[0].PORT_DIRSET = (1 << ONBOARD_LED);
 
     // Set all 6 line sensor pins as inputs
     PORT_SEC_REGS->GROUP[0].PORT_DIRCLR = (1 << LEFT_LINE_1) | (1 << LEFT_LINE_2) | 
-                                          (1 << MIDDLE_LINE_1) | (1 << MIDDLE_LINE_2) |
+                                          (1 << MID_LINE_1) | (1 << MID_LINE_2) |
                                           (1 << RIGHT_LINE_1) | (1 << RIGHT_LINE_2);
 
     // Enable input buffers for all 6 sensors
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_1] |= PORT_PINCFG_INEN(1);   
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_2] |= PORT_PINCFG_INEN(1);   
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_1] |= PORT_PINCFG_INEN(1);    
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_2] |= PORT_PINCFG_INEN(1);    
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MID_LINE_1] |= PORT_PINCFG_INEN(1);    
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MID_LINE_2] |= PORT_PINCFG_INEN(1);    
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_1] |= PORT_PINCFG_INEN(1);   
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_2] |= PORT_PINCFG_INEN(1);   
 
     // Disable pull-ups for all 6 sensors
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[LEFT_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
-    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MIDDLE_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MID_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
+    PORT_SEC_REGS->GROUP[0].PORT_PINCFG[MID_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_1] &= ~PORT_PINCFG_PULLEN_Msk;
     PORT_SEC_REGS->GROUP[0].PORT_PINCFG[RIGHT_LINE_2] &= ~PORT_PINCFG_PULLEN_Msk;
 
