@@ -1,39 +1,38 @@
 #ifndef PINS_H
 #define PINS_H
 
-// Motor Pin Definitions
-#define EN_LEFT_MOTOR   16      // Enable left motor
-#define REV_LEFT_MOTOR  8      // reverse left motor
-#define FOR_LEFT_MOTOR  11       // forward left motor
-#define EN_RIGHT_MOTOR  17      // Enable right motor
-#define REV_RIGHT_MOTOR 9      // reverse right motor
-#define FOR_RIGHT_MOTOR 10       // forward right motor
+// Motor Control Block
+#define LEFT_MOTOR_REV   8       // PA08 - IN1
+#define LEFT_MOTOR_FOR   11      // PA11 - IN2
+#define RIGHT_MOTOR_REV  9       // PA09 - IN3
+#define RIGHT_MOTOR_FOR  10      // PA10 - IN4
+#define LEFT_MOTOR_EN    16      // PA16 - ENA
+#define RIGHT_MOTOR_EN   17      // PA17 - ENB
 
-// Line Sensor Pin Definitions 
-#define LEFT_LINE_1     3       // PA03 - Left sensor 1
-#define LEFT_LINE_2     2       // PA02 - Left sensor 2
-#define MIDDLE_LINE_1   3       // PB03 - Middle sensor 1
-#define MIDDLE_LINE_2   2       // PB02 - Middle sensor 2
-#define RIGHT_LINE_1    23      // PB23 - Right sensor 1
-#define RIGHT_LINE_2    19      // PA19 - Right sensor 2
+// Line Sensor Block
+#define LEFT_LINE_1      20      // PA20 - OUT1
+#define LEFT_LINE_2      14      // PA14 - OUT2
+#define MID_LINE_1       6       // PA06 - OUT3
+#define MID_LINE_2       3       // PA03 - OUT4
+#define RIGHT_LINE_1     19      // PA19 - OUT5
+#define RIGHT_LINE_2     7       // PA07 - OUT6
 
-// Wall Sensor Pin Definitions
-// Left Wall Sensor
-#define LEFT_WALL_TRIG  20      // PA20 - Left wall trigger
-#define LEFT_WALL_ECHO  14      // PA14 - Left wall echo
+// Wall Sensor Block 
+#define MID_WALL_TRIG    3       // PB03 - TRIG1
+#define MID_WALL_ECHO    2       // PB02 - ECHO1 (has TC2 peripheral)
+#define LEFT_WALL_TRIG   21      // PA21 - TRIG2
+#define LEFT_WALL_ECHO   22      // PA22 - ECHO2 (has TC0 peripheral)
 
-// Middle Wall Sensor
-#define MIDDLE_WALL_TRIG      // PA16 - Middle wall trigger
-#define MIDDLE_WALL_ECHO      // PA17 - Middle wall echo
+// LCD Block
+#define LCD_SDA          12      // PA12 - SDA (has I2C peripheral)
+#define LCD_SCL          13      // PA13 - SCL (has I2C peripheral)
 
-// Right Wall Sensor
-#define RIGHT_WALL_TRIG 21      // PA21 - Right wall trigger
-#define RIGHT_WALL_ECHO 22      // PA22 - Right wall echo
+// Bluetooth Block
+#define BT_RX            8       // PB08 - RX (has CDC RX)
+#define BT_TX            9       // PB09 - TX (has CDC TX)
 
-// Onboard LED Pin Definition
-#define ONBOARD_LED     15      // PA15
-
-#define LCD_SDA 12
-#define LCD_SCL 13
+// Onboard Block
+#define ONBOARD_LED      15      // PA15
+#define ONBOARD_PB       23      // PA23
 
 #endif // PINS_H
