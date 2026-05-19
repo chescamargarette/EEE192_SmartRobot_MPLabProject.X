@@ -6,9 +6,9 @@
 #include "pins.h"
 #include "motor.h"
 
-// Initialize Global Variables
-//extern int alternate_state = 0;                 // to be updated in main.c
-//extern unsigned long last_alternate_time = 0;   // to be updated in main.c
+// Declare Variables
+static int left_on_time;
+static int right_on_time;
 
 // Function Definitions
 void init_motors(void) {
@@ -16,6 +16,10 @@ void init_motors(void) {
     PORT_SEC_REGS->GROUP[0].PORT_DIRSET = (1 << LEFT_MOTOR_EN) | (1 << RIGHT_MOTOR_EN) | 
                                           (1 << LEFT_MOTOR_FOR) | (1 << LEFT_MOTOR_REV) | 
                                           (1 << RIGHT_MOTOR_FOR) | (1 << RIGHT_MOTOR_REV);
+    // Calculate PWM on-times based on speed percentages
+    // Scale 0-100 to microseconds within PWM cycle
+    left_on_time = (LEFT_MOTOR_SPEED * PWM_CYCLE) / 100;
+    right_on_time = (RIGHT_MOTOR_SPEED * PWM_CYCLE) / 100;
 }
 
 void enable_motors(void) {
@@ -34,10 +38,20 @@ void stop_motors(void) {
 void run_motors_forward(void) {
     PORT_SEC_REGS->GROUP[0].PORT_OUTSET = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_FOR);
     PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_REV) | (1 << RIGHT_MOTOR_REV);
-    for (volatile int on_ticks = 0; on_ticks < LEFT_MOTOR_TIME; on_ticks++);
-        PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR);
-    for (volatile int on_ticks = 0; on_ticks < RIGHT_MOTOR_TIME; on_ticks++);
-        PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << RIGHT_MOTOR_FOR); 
+    for (int t = 0; t < PWM_CYCLE; t++) {
+        if (t == left_on_time) {
+            PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR);
+        }
+        if (t == right_on_time) {
+            PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << RIGHT_MOTOR_FOR);
+        }
+        delay_us(1);  // 1us per iteration
+    }
+    
+    // Ensure both motors are OFF at end of PWM cycle
+    PORT_SEC_REGS->GROUP[0].PORT_OUTCLR = (1 << LEFT_MOTOR_FOR) | (1 << RIGHT_MOTOR_FOR);
+    
+    // Off time between cycles
     for (volatile int off_ticks = 0; off_ticks < MOTOR_OFF_TIME; off_ticks++);
 }
 
