@@ -1,4 +1,4 @@
-// This header file contains the initialization of the entire project.
+// This source file contains the initialization of the entire project.
 // NOTE: Do not use, this is not yet integrated to main.c
 // For future purposes
 
