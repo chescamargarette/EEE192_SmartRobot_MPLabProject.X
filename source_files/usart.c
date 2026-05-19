@@ -1,4 +1,6 @@
-
+// This source file contains the implementation of the USART debugging.
+// NOTE: Do not use, this is not yet integrated to main.c
+// For future purposes
 
 #include "platform.h"
 #include "usart.h"
