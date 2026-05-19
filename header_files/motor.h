@@ -1,5 +1,5 @@
 // This header file contains the initialization of the motor control block.
-// NOTE: Do not use, this is not integrated yet to main.c
+// NOTE: Do not use, this is not yet integrated to main.c
 // For future purposes
 
 #ifndef MOTOR_H
