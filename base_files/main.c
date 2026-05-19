@@ -1,4 +1,4 @@
-// Current version from Cyra
+// Current version by Cyra (May 19)
 
 #include <xc.h>
 #include <stdbool.h>
