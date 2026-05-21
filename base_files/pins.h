@@ -7,7 +7,7 @@
 #define LEFT_MOTOR_REV   8       // PA08 - IN1
 #define LEFT_MOTOR_FOR   3       // PB03 - IN2
 #define RIGHT_MOTOR_REV  9       // PA09 - IN3
-#define RIGHT_MOTOR_FOR  4       // PB04 - IN4
+#define RIGHT_MOTOR_FOR  2       // PB02 - IN4
 #define LEFT_MOTOR_EN    16      // PA16 - ENA
 #define RIGHT_MOTOR_EN   17      // PA17 - ENB
 
