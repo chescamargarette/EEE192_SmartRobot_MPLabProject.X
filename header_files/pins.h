@@ -1,11 +1,13 @@
+// Current version by Chesca (May 19)
+
 #ifndef PINS_H
 #define PINS_H
 
 // Motor Control Block
 #define LEFT_MOTOR_REV   8       // PA08 - IN1
-#define LEFT_MOTOR_FOR   11      // PA11 - IN2
+#define LEFT_MOTOR_FOR   4       // PA04 - IN2
 #define RIGHT_MOTOR_REV  9       // PA09 - IN3
-#define RIGHT_MOTOR_FOR  10      // PA10 - IN4
+#define RIGHT_MOTOR_FOR  5       // PA05 - IN4
 #define LEFT_MOTOR_EN    16      // PA16 - ENA
 #define RIGHT_MOTOR_EN   17      // PA17 - ENB
 
@@ -18,18 +20,18 @@
 #define RIGHT_LINE_2     7       // PA07 - OUT6
 
 // Wall Sensor Block 
-#define MID_WALL_TRIG    3       // PB03 - TRIG1
-#define MID_WALL_ECHO    2       // PB02 - ECHO1 (has TC2 peripheral)
-#define LEFT_WALL_TRIG   21      // PA21 - TRIG2
-#define LEFT_WALL_ECHO   22      // PA22 - ECHO2 (has TC0 peripheral)
+#define MID_WALL_TRIG    10      // PA10 - FRONT TRIG
+#define MID_WALL_ECHO    11      // PA11 - FRONT ECHO
+#define LEFT_WALL_TRIG   0       // PA00 - LEFT TRIG
+#define LEFT_WALL_ECHO   1       // PA01 - LEFT ECHO
 
 // LCD Block
 #define LCD_SDA          12      // PA12 - SDA (has I2C peripheral)
 #define LCD_SCL          13      // PA13 - SCL (has I2C peripheral)
 
 // Bluetooth Block
-#define BT_RX            8       // PB08 - RX (has CDC RX)
-#define BT_TX            9       // PB09 - TX (has CDC TX)
+#define BT_RX            9       // PB08 - RX (has CDC RX)
+#define BT_TX            8       // PB09 - TX (has CDC TX)
 
 // Onboard Block
 #define ONBOARD_LED      15      // PA15
