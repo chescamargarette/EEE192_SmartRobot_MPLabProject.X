@@ -5,9 +5,9 @@
 
 // Motor Control Block
 #define LEFT_MOTOR_REV   8       // PA08 - IN1
-#define LEFT_MOTOR_FOR   11      // PA11 - IN2
+#define LEFT_MOTOR_FOR   3       // PB03 - IN2
 #define RIGHT_MOTOR_REV  9       // PA09 - IN3
-#define RIGHT_MOTOR_FOR  10      // PA10 - IN4
+#define RIGHT_MOTOR_FOR  4       // PB04 - IN4
 #define LEFT_MOTOR_EN    16      // PA16 - ENA
 #define RIGHT_MOTOR_EN   17      // PA17 - ENB
 
@@ -20,10 +20,10 @@
 #define RIGHT_LINE_2     7       // PA07 - OUT6
 
 // Wall Sensor Block 
-#define MID_WALL_TRIG    3       // PB03 - TRIG1
-#define MID_WALL_ECHO    2       // PB02 - ECHO1 (has TC2 peripheral)
-#define LEFT_WALL_TRIG   21      // PA21 - TRIG2
-#define LEFT_WALL_ECHO   22      // PA22 - ECHO2 (has TC0 peripheral)
+#define MID_WALL_TRIG    10      // PA10 - FRONT TRIG
+#define MID_WALL_ECHO    11      // PA11 - FRONT ECHO
+#define LEFT_WALL_TRIG   0       // PA00 - LEFT TRIG
+#define LEFT_WALL_ECHO   1       // PA01 - LEFT ECHO
 
 // LCD Block
 #define LCD_SDA          12      // PA12 - SDA (has I2C peripheral)
